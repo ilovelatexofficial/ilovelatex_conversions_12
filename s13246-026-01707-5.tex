@@ -1,0 +1,712 @@
+\documentclass{svjour3}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\begin{document}
+\title{A new model based on multi-axis vision transformer for chondromalacia patella diagnosis in magnetic resonance scans}
+\author{Semih Demirel \and Okan Demirtaş \and Sümeyra Kuş Ordu \and Ömer Kazcı \and Habip Eser Akkaya \and Oktay Yıldız}
+\institute{Department of Information Systems, Gazi University, Ankara, Turkey \and Department of Computer Engineering, Gazi University, Ankara, Turkey \and Department of Radiology, Presidential Health Center, Ankara, Turkey \and Department of Radiology, Ankara Education and Research Hospital, Ankara, Turkey}
+\maketitle
+\begin{abstract}
+A degenerative disease of the patellofemoral joint cartilage, chondromalacia patella (CMP) often results in anterior knee discomfort and functional disability. Determining the best course of therapy and stopping the progression of the disease depend on an accurate and timely diagnosis. In this work, we provide a deep learning architecture based on transformers for the classification of chondromalacia patella using magnetic resonance imaging (MRI) data. We assessed transformer-based designs including Multi-Axis Vision Transformer (MaxViT), Vision Transformer (ViT), and Swin Transformer in addition to convolutional neural network (CNN) based models like Google Network (GoogLeNet), Residual Network 18 (ResNet18), and Mobile Network v2 (MobileNetV2). We evaluated the models’ ability to differentiate between cases of chondromalacia patella and normal cases. With an accuracy of 0.9817, precision of 0.9821, recall of 0.9817, and F1-score of 0.9818, Multi-Axis Vision Transformer outperformed all other models on the testing dataset.
+\keywords{Chondromalacia patella, Vision transformer, Multi-axis vision transformer, Swin transformer, Medical image classification, Deep learning, Convolutional neural networks}
+\end{abstract}
+% ===== MAIN DOCUMENT CONTENT =====
+
+\section{Introduction}
+Anterior knee discomfort is frequently the result of chondromalacia patella, a disorder marked by degenerative changes in the patellofemoral joint’s cartilage, one of the most important areas of the knee joint. During or after athletic activities, this condition can cause knee pain, discomfort, and loss of function, especially in young, energetic people \cite{ref26}. Although cartilage tissue’s structural integrity and ability to reduce friction are essential for joint health, chondromalacia patella’s degenerative nature is highlighted by its low capability for self-healing. Therefore, avoiding increasing cartilage degeneration and identifying suitable treatment options depend on an accurate and timely diagnosis of the illness \cite{ref31}.
+Imaging procedures, physical examinations, and clinical examinations are examples of traditional diagnostic approaches. Because it can give high contrast and thorough visualization of cartilage tissue, MRI is specifically regarded as the gold standard for assessing chondromalacia \cite{ref8}. Despite the fact that MRI enables a thorough examination of the morphological and structural characteristics of the patellofemoral joint’s cartilage, the interpretation of the images frequently results in subjective evaluations due to the requirement for extremely specialized knowledge. This may lead to missed early stage tissue alterations and delays in diagnosis \cite{ref32}. These drawbacks emphasize the necessity of more impartial and repeatable techniques to aid in the diagnosis procedure.
+The development of automated diagnostic systems for medical imaging has advanced significantly in recent years because of groundbreaking developments in deep learning and artificial intelligence. Convolutional neural networks and other deep learning models may be trained on big data-sets to identify pathological alterations and microscopic tissue distinctions that can be difficult for the human eye to see \cite{ref22}. These algorithms provide accurate early stage damage identification and dependable disease stage categorization, especially in the evaluation of patellar cartilage \cite{ref37}. In this regard, techniques based on deep learning have a lot of promise for expediting clinical diagnostic procedures and facilitating impartial assessments.
+
+The development of automated diagnostic systems for medical imaging has advanced significantly in recent years because of groundbreaking developments in deep learning and artificial intelligence. Convolutional neural networks and other deep learning models may be trained on big data-sets to identify pathological alterations and microscopic tissue distinctions that can be difficult for the human eye to see \cite{ref22}. These algorithms provide accurate early stage damage identification and dependable disease stage categorization, especially in the evaluation of patellar cartilage \cite{ref37}. In this regard, techniques based on deep learning have a lot of promise for expediting clinical diagnostic procedures and facilitating impartial assessments.
+Created algorithms using deep learning are currently being used to diagnose a variety of illnesses after being combined with information gleaned from MR images. These techniques’ capacity to accurately identify cartilage degradation at various clinical phases is demonstrated by their training on data from sizable patient populations. Furthermore, they have a major advantage in guiding patients toward early intervention and therapy because of their high sensitivity and specificity in detecting microscopic tissue alterations at an early stage \cite{ref15, ref36}. Therefore, the possibility for better disease progression assessment and treatment planning is increased by the development of automated and objective diagnostic tools in both clinical and research settings.
+The study by \cite{ref5} used a variety of classification techniques and vibroarthrographic (VAG) signals to distinguish between normal instances and knee joint problems. After processing the signals, features were taken out. Several machine learning techniques were used to categorize knee joint diseases following extraction. A least squares support vector machine (LSSVM) with the apriori method produced the best accuracy rate of 0.9431.
+Vibroarthrography signals were used in \cite{ref19} to classify osteoarthritis. They evaluated 84 patients, 40 of whom were in the research group and 40 of whom were in the control group. Machine learning methods were employed to categorize osteoarthritis. A multilayer perceptron produced the greatest results, with an accuracy rate of 0.893.
+X-ray, computer tomography (CT), and MRI were among the imaging modalities used to classify anomalies in the knee in the study by \cite{ref30}. Using an ensemble approach, the suggested network produced three outcomes from pictures acquired using various modalities. After the images’ features were taken out, they were put into an attention-based convolutional neural network. They obtained an F1-score of 0.85 and an accuracy rate of 0.84.
+\cite{ref27} examined knee vibroarthrographic signals in order to determine possible parameters for the early identification of patellar chondromalacia. Analysis was done on the signals’ frequency properties, such as energy and the total spectral power in each 500 Hz frequency range. They discovered that, especially in the high-frequency bands, the energy and spectral power of VAG signals in people with chondromalacia patella were noticeably greater than those of normal VAG signals.
+The work by \cite{ref33} created a novel technique that uses texture analysis of magnetic resonance images and cartigrams. The study looked at 101 people, 65 of whom had chondromalacia patella and 36 of whom were controls, to assess patellar cartilage and its relationship with femoro‑tibial cartilage. Six prediction models were used to extract and assess 43 femorotibial cartilage textures and 27 patellar cartilage cartigram characteristics. Using cartigrams in the deep layer produced the greatest results for patellar cartilage, with an average AUC of 0.75 using the linear support vector machine model and three features.
+A computer‑assisted diagnostic technique was developed in the study by \cite{ref40} to identify osteoarthritis in the knee using arthrogram signals. They suggested a deep learning model that combines an aggregated multiscale dilated convolution network with a Laplace distribution‑based approach in order to do this. The accuracy rate they obtained with the suggested network was 0.936.
+The work by \cite{ref39} sought to investigate and assess a new technique for using radiomic characteristics from patellar sagittal T2‑weighted (T2W) images to diagnose patellar chondromalacia. Sagittal T2W scans of the patella from 40 patients with patellar chondromalacia and 40 healthy individuals were included in the experimental data. The categorization model was trained using a machine learning technique and subsequently assessed. The accuracy of the testing set was 0.7.
+Our work is distinct from previous research since it uses MRI scans to categorize chondromalacia patella and normal instances. Prior research in the literature has mostly concentrated on utilizing vibroarthrographic signals to diagnose osteoarthritis or identify anomalies in the knee. Nevertheless, there aren’t many research that focus on chondromalacia patella identification particularly. Our work offers a unique contribution to the literature in this respect.
+Global structural features including cartilage thickness, morphological integrity, or tissue degeneration are often the focus of MRI‑based cartilage evaluation techniques in the literature. Nevertheless, no deep learning‑based study that explicitly targets the identification of chondromalacia patella from MRI scans has been found, according to a thorough analysis of the literature. Research in this field has also been limited by the absence of a publicly accessible MRI dataset for CMP categorization.
+As a consequence, MRI images were carefully gathered in this study in compliance with conventional clinical MRI protocols and annotated in line with expert opinions, creating a new dataset not seen in the existing literature. Due to the small quantity of data available, the current study was intended as a starting step focused on binary classification, even though examining CMP across four different grades would be clinically more thorough and useful.
+Using information from MRI scans, a deep learning‑based model was created for this work, and its ability to diagnose chondromalacia patella was carefully assessed. The study’s main goals are to provide a new paradigm for the diagnosis of chondromalacia patella and show how deep learning algorithms can be used to evaluate the cartilage tissue in the knee joint.
+This was accomplished by using CNN‑based architectures, such as GoogLeNet \cite{ref41}, ResNet18 \cite{ref17}, and Mobile‑NetV2 \cite{ref35}, as well as transformer‑based models, such as MaxViT \cite{ref42}, ViT \cite{ref11}, and the Swin Transformer \cite{ref24}, for the binary classification of chondromalacia patella and normal cases. The findings show that deep learning algorithms are capable of accurately and successfully identifying chondromalacia patella.
+Sect. 2. Section 3 presents the models’ experimental results. The experimental results are thoroughly evaluated and interpreted in Sect. 4. Section 5 provides a detailed analysis of the research findings.
+\section{Methods}
+
+\section{Methods}
+\subsection{Magnetic resonance imaging protocol}
+A Siemens 1.5 Tesla MRI scanner was used to obtain the knee MRI images used in this investigation. The following settings were made for the imaging parameters: T2-weighted and proton density (PD) sequences were among the imaging sequences. The field of view (FOV) was adjusted to 16 cm, the matrix size to 512 $\times$ 512, and the slice thickness to 3 mm. For the T2 sequence, the repetition duration (TR) fluctuated between 2000 and 4000 ms, while the time-to-echo (TE) values ranged from 40 to 80 ms. The axial, coronal, and sagittal planes of the images were examined. Every image utilized in the study was obtained in the axial plane; no images from other imaging planes were mixed together. The axial view offers the best visibility for the evaluation of chondromalacia patella, which is the main reason for this decision.
+\subsection{Main contributions of our study}
+\subsubsection{Dataset}
+\begin{itemize}
+\item A novel dataset of MRI images was produced for the identification of chondromalacia patella.
+\item The transformer and CNN models were thoroughly compared on the training, validation, and testing datasets.
+\item A thorough performance comparison and statistical analysis were also carried out.
+\item Our goal is to detect chondromalacia patella in MRI images, as opposed to the studies in the literature that focus on knee anomalies.
+\end{itemize}
+The following is the rest of the paper: the dataset and transformer-based deep learning models are described in depth in Table~\ref{tab:dataset}.
+\begin{table}[htbp]
+\centering
+\caption{Dataset details}
+\label{tab:dataset}
+\begin{tabular}{lllll}
+\hline
+Fold1 & Fold2 & Fold3 & Fold4 & Fold5 \\
+\hline
+Grade0 & Grade0 & Grade0 & Grade0 & Grade0 \\
+Grade1-2-3-4 & Grade1-2-3-4 & Grade1-2-3-4 & Grade1-2-3-4 & Grade1-2-3-4 \\
+\hline
+\end{tabular}
+\end{table}
+
+The relevant medical center’s standard clinical procedures provided the joint MRI images used in this investigation. The study was carried out with the Gazi University Ethics Committee’s consent; on December 13, 2024, an official ethics consent document (Approval No: 1117365) was given. The details of the dataset are presented in Table 1. The 5‑fold cross validation method was used to divide the dataset into training and testing sets. 10\% of the training data was then divided for validation. There are 1048 image files from the Grade 1–4 classes and 425 images from the Grade 0 class in each fold, for a total of 1473 images in the dataset.
+In every experiment, a strict data partitioning procedure was used to avoid any data leaking during the data splitting phase. A 5‑fold cross validation strategy was used to arrange the training data. In each fold, the data were divided into training and testing sets, with an extra 10\% of the training part put aside as a validation set. Testing and validation samples were kept out of the training process at all times thanks to this strategy. In order to avoid enhanced samples from spreading to other splits and creating almost identical instances, data augmentation techniques were only applied to the training set. The data splitting was naturally carried out at the patient level since the dataset does not contain many images from the same patient; as a result, no image from a particular patient appears in more than one set. Additionally, only the training data was used for hyperparameter tuning; neither the validation nor the testing sets were utilized for model selection or hyperparameter optimization. The testing set was kept completely separated under this technique, guaranteeing that the stated performance metrics were acquired apart from the training procedure.
+Low‑quality or unreadable images were removed prior to analysis. Furthermore, to minimize error margins and ensure diagnostic accuracy, all images were first reviewed by a medical expert and then verified by a second expert. All knee MRI examinations were independently reviewed for the presence and grading of chondromalacia patella by two radiologist‑researchers, each with more than 10 years of subspecialty experience in musculoskeletal imaging. Initial readings were performed separately and blinded to all clinical data. In cases of discrepant interpretations, the images were re‑evaluated in a dedicated consensus session to establish a final agreed result. The inter‑researchers reliability of the assessments was excellent, with a Cohen’s kappa coefficient exceeding 0.91, indicating a very high level of consistency between the two readers.
+The dataset’s sample images are displayed in Fig.~\ref{fig:1}.
+\begin{table}[htbp]
+\centering
+\caption{}
+\label{tab:1}
+\begin{tabular}{l}
+\hline
+Grade0Grade1-2-3-4Grade0Grade1-2-3-4Grade0Grade1-2-3-4Grade0Grade1-2-3-4Grade0Grade1-2-3-4 \\
+\hline
+Training Validation306754306754306754306754306754 \\
+\hline
+34843484348434843484 \\
+\hline
+Testing8521085210852108521085210 \\
+\hline
+Total42510484251048425104842510484251048 \\
+\hline
+\end{tabular}
+\end{table}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure1.png}
+\caption{}
+\label{fig:1}
+\end{figure}
+
+The input feature map is represented by Eq.~\ref{eq:1}.
+\begin{equation}
+X \in \mathbb{R}^{H \times W \times C}
+\label{eq:1}
+\end{equation}
+where, $X$ is the input feature map.
+The four parallel branches that make up the Inception module are described by Eq.~\ref{eq:2}.
+\begin{equation}
+Y_1 = f_1 Y_2 = f_3 Y_3 = f_5 Y_4 = f_1
+\label{eq:2}
+\end{equation}
+
+\begin{equation}
+\times 3 \; 1(X) f1 f1 p3 \; \bigl( 1 \; 5 \; \bigl( \times \times \times 1(X)1(X) \bigr) 3(X) \bigr) \; () \; (2)
+\end{equation}
+where, a convolution process with a knonlinear activation function is shown by $f_k$ denotes a max-pooling operation of $3 \times 3$.
+
+$\times$
+k kernel and a k(), p33()
+$\times$
+The output of the Inception module is obtained by concatenating the outputs of every branch along the channel dimension, as shown in Eq.~\ref{eq:3}.
+$\times$
+YInception = Concat (Y1, Y2, Y3, Y4)
+\begin{equation}
+Y_{\text{Inception}} = \mathrm{Concat}(Y_1, Y_2, Y_3, Y_4)
+\label{eq:3}
+\end{equation}
+where Concat() denotes the feature maps’ channel-wise concatenation. The 1 in Fig.~2.
+1 convolution with Inception module is shown
+$\times$
+Swin transformer
+A hierarchical vision transformer architecture-based on windowed self-attention is shown by the Swin Transformer [25]. A shifted-window multi head self-attention mechanism facilitates cross window information flow, while window multi head self-attention computes self-attention inside non-overlapping local windows [23]. Layer normalization and residual connections are wrapped around a multilayer perceptron, which comes after alternating window multi head self-attention and shifted window multi head self-attention layers in each Swin block [38]. The Swin Transformer can effectively scale to high resolution vision tasks thanks to its hierarchical structure and linear computing complexity.
+The Swin Transformer’s architecture is displayed in Fig.~3.
+ResNet18
+ResNet18 is a lightweight residual convolutional neural network with 18 layers structured into four basic block phases. By using identity shortcut connections, each basic block helps the model acquire residual mappings, which reduces vanishing gradients and enhances training stability [47]. ResNet18 offers a strong foundation for image classification and other downstream applications thanks to its low parameter count, hierarchical feature extraction, and excellent residual architecture [3].
+Given an input feature map, X defines the output of a residual block.
+$\in$
+
+\begin{equation}
+y = F(x) + X
+\label{eq:4}
+\end{equation}
+Figure~\ref{fig:1} provides an illustration of a residual block.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure1.png}
+\caption{The dataset’s examples of images are displayed. A medical professional annotates every image with the appropriate grade. Normal instances are represented by grade~0, while CMP cases are represented by grades~1--4.}
+\label{fig:1}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure2.png}
+\caption{Inception module that uses $1\times1$ convolution \cite{ref41}.}
+\label{fig:2}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure3.png}
+\caption{Architecture of Swin Transformer \cite{ref24}.}
+\label{fig:3}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure4.png}
+\caption{Residual block of ResNet18 \cite{ref17}.}
+\label{fig:4}
+\end{figure}
+In order to achieve great efficiency in mobile and embedded vision workloads, MobileNetV2 incorporates the inverted residual and linear bottleneck architecture \cite{ref18}. Each block uses a $1\times1$ convolution to extend the input channels, a depthwise $3\times3$ convolution, and a linear $1\times1$ convolution to project the features back to a low‑dimensional space \cite{ref29}. When the input and output resolutions occurs residual.
+
+In order to achieve great efficiency in mobile and embedded vision workloads, MobileNetV2 incorporates the inverted residual and linear bottleneck architecture \cite{ref18}. Each block uses a 1x1 convolution to extend the input channels, a depthwise 3x3 convolution, and a linear 1x1 convolution to project the features back to a low-dimensional space \cite{ref29}. When the input and output resolutions occurs residual connections are used. This approach minimizes computing expense while maintaining representational power.
+Table 2 provides the MobileNetV2’s tabular form. In Table 2, \(t\) is the expansion factor that regulates the channel‑wise expansion within each inverted residual block through the initial 1x1 convolution, \(c\) is the number of output channels generated by the projection layer, \(n\) is the number of repeated blocks in a stage, and \(s\) is the first block’s stride, which establishes the feature maps’ spatial downsampling \cite{ref13}.
+\begin{table}[htbp]
+\centering
+\caption{MobileNetV2 architecture with an input size of 224}
+\label{tab:mobnetv2}
+\begin{tabular}{ll}
+\hline
+Stage & 12345678910 \\
+\hline
+Operator & Convolution 3 Bottleneck Bottleneck Bottleneck Bottleneck Bottleneck Bottleneck Bottleneck Convolution 1 GAP + FC \\
+\hline
+c & 3216243264961603201280Classes \\
+\hline
+t & –1666666–– \\
+\hline
+$\times$ & 1 \\
+\hline
+224 & 3 \\
+\hline
+$\times$ & $\times$ \\
+\hline
+n & 1123433111 \\
+\hline
+s & 212221211– \\
+\hline
+\end{tabular}
+\end{table}
+
+Z = xpE, where \(E\) is a learnable projection matrix and \(Z\) is the resultant patch embeddings.
+A positional encoding \(Z_{0} = Z + P\), where \(P\) is a learn‑able positional encoding, is used to create spatial information while preserving spatial structure \cite{ref46}.
+ViT employs a transformer encoder that combines multi‑head self‑attention with feedforward networks. Using learn‑able weight matrices in multi‑head self‑attention, each embedding \(Z\) is transformed into queries (\(Q\)), keys (\(K\)), and values (\(V\)) using equation~\ref{eq:5} \cite{ref34}.
+\begin{equation}
+Q = ZW_{Q},\qquad K = ZW_{K},\qquad V = ZW_{V}
+\label{eq:5}
+\end{equation}
+Using Eq.~\ref{eq:6}, the scaled dot‑product attention is calculated.
+\begin{equation}
+\text{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_{k}}}\right) V
+\label{eq:6}
+\end{equation}
+Equation~\ref{eq:7} defines multi‑head attention.
+\begin{equation}
+\text{MHSA}(Z) = \text{Concat}(head_{1}, \dots, head_{h})\,W_{o}
+\label{eq:7}
+\end{equation}
+D. After the where the output projection is \(W_{o} \in\) transformer block, the class token is retrieved and then classified using a multilayer perceptron.
+The fully connected (FC) and global average pooling (GAP) layers, which combine spatial feature maps into a compact feature vector.
+Vision transformer
+
+\section{Vision transformer}
+Images are divided into fixed-size patches by ViT, which interprets them as a sequence of tokens \cite{ref12}. An input image $C$ is used to construct non‑overlapping patches $R_{H\times W}$ of size $P\times P$, where $H$, $W$ represent the image height and width, $C$ represents the number of channels, and $P$ represents the patch size. Figure~\ref{fig:vision-transformer} displays the Vision Transformer's construction.
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=0.8\linewidth]{images/figure1.png}
+ \caption{Architecture of Vision Transformer \cite{ref11}}
+ \label{fig:vision-transformer}
+\end{figure}
+A linear projection is used to embed each patch into a $D$‑dimensional space \cite{ref1}. The linear projection formula is
+\begin{equation}
+ \mathbf{z}_i = \mathbf{W}_p \, \mathbf{p}_i + \mathbf{b}_p ,
+ \label{eq:linear-projection}
+\end{equation}
+where $\mathbf{p}_i$ denotes the $i$‑th patch vector, and $\mathbf{W}_p$, $\mathbf{b}_p$ are learnable parameters.
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=0.8\linewidth]{images/figure2.png}
+ \caption{Architecture of MaxViT model \cite{ref42}}
+ \label{fig:maxvit-model}
+\end{figure}
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=0.8\linewidth]{images/figure3.png}
+ \caption{Architecture of MaxViT block \cite{ref42}}
+ \label{fig:maxvit-block}
+\end{figure}
+\section{Multi-axis vision transformer}
+For effective feature extraction, MaxViT uses mobile inverted bottleneck convolution (MBConv) blocks \cite{ref28}. Equation~\ref{eq:mbconv} expresses an MBConv block without downsampling given an input feature map $x$.
+\begin{equation}
+ x = x + \operatorname{Proj}\!\bigl(\operatorname{SE}\bigl(\operatorname{DWConv}\bigl(\operatorname{Conv}(\operatorname{Norm}(x))\bigr)\bigr)\bigr),
+ \label{eq:mbconv}
+\end{equation}
+
+\begin{equation}
+x = x + \text{Proj}\big(\text{SE}\big(\text{DWConv}\big(\text{Conv}\big(\text{Norm}(x)\big)\big)\big)\big)
+\label{eq:8}
+\end{equation}
+Batch normalization is denoted by \texttt{Norm}, channel expansion by \texttt{Conv}, depthwise convolution by \texttt{DWConv}, squeeze‑and‑excitation layer by \texttt{SE}, and channel reduction by \texttt{Proj}, which is pointwise.
+To improve spatial awareness, MaxViT uses relative attention \cite{ref14}. Equation 9 defines the self‑attention mechanism given query $Q$, key $K$, value $V$, and a learned positional bias $B$.
+\begin{equation}
+x = x + \text{Unblock}\big(\text{RelAttention}\big(\text{Block}\big(\text{LN}(x)\big)\big)\big)
+\label{eq:11}
+\end{equation}
+where the inverse operations of the block functions are denoted by \texttt{Unblock}. The grid partitioning for global feature extraction is described by Eq.~12 \cite{ref42}.
+\[
+\text{Grid} : (H, W, C)
+\]
+\[
+(G \times \rightarrow H_G,\; G \times W_G,\; C) \rightarrow
+\]
+
+The self‑attention inside each grid sector is applied using Eq.~\eqref{eq:13}.
+\begin{equation}
+x = x + \text{Ungrid}\bigl(\text{RelAttention}\bigl(\text{Grid}(\text{LN}(x))\bigr)\bigr)
+\label{eq:13}
+\end{equation}
+where the inverse operations of the grid functions are denoted by \textit{ungrid}.
+The MaxViT model’s design is displayed in Fig.~\ref{fig:6}. The MaxViT block’s design is depicted in Fig.~\ref{fig:7}.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure6.png}
+\caption{MaxViT model design}
+\label{fig:6}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure7.png}
+\caption{MaxViT block design}
+\label{fig:7}
+\end{figure}
+\begin{equation}
+\text{RelAttention}(Q, K, V) = \operatorname{softmax}\!\left(\frac{Q K^{\mathsf{T}}}{\sqrt{d}} + B V\right)
+\label{eq:9}
+\end{equation}
+Results.
+
+\section{Results}
+where $d$ represents the hidden dimension.
+Block Attention functions locally inside $P$.
+$P$ image blocks that do not overlap \cite{ref42}. Grid attention uses sparse global attention to capture long-range interdependence.
+Equation 10 is defined in \cite{ref42} to divide an input feature $R H$ $C$ into blocks in block attention.
+\begin{equation}
+W \in x \; HP \times P,\; WP \times P, C \rightarrow (
+\label{eq:1}
+\end{equation}
+
+The block is defined as \((H, W, C)\).
+\(HWP_{2} \rightarrow (\, , P_{2}, C\,)\).
+Each block’s self‑attention is applied using Eq.~11.
+For this study, training and testing were conducted using the Windows 11 operating system. The specifics of computer hardware are as follows: Technical specifications include an Intel Core i5‑11320 H central processing unit (CPU) running at 3.2 GHz, a 4 GB Nvidia Geforce 3050Ti graphics processing unit (GPU), and 8 GB of random access memory (RAM).
+Equations 14, 15, 16, and 17 were used to evaluate the model performance. In addition, thorough statistical analyses were carried out and the McNemar’s p‑value and boot‑strapped confidence intervals (CIs) were calculated.
+Physical and Engineering Sciences in Medicine\(^1\) 3 
+\begin{equation}
+\text{accuracy} = TP + T N T P + F P + T N + F N
+\label{eq:accuracy}
+\end{equation}
+Accuracy gives an overall performance evaluation by calculating the percentage of properly identified samples among all samples.
+\begin{equation}
+\text{precision} = T PT P + F P
+\label{eq:precision}
+\end{equation}
+
+Precision measures the accuracy of positive predictions by dividing the number of accurately predicted positive samples by the total number of expected positives.
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP}
+\label{eq:precision}
+\end{equation}
+Recall determines how effectively the model catches positive instances by calculating the percentage of real positive samples that were accurately recognized.
+\begin{equation}
+\text{Recall} = \frac{TP}{TP + FN}
+\label{eq:recall}
+\end{equation}
+The F1-score is a statistic that balances precision and recall by taking the harmonic mean of the two. It ensures that neither false positives nor false negatives dominate the evaluation, which is particularly helpful when there is an imbalance between positive and negative classifications.
+\begin{equation}
+F_{1} = 2 \,\frac{\text{precision} \times \text{recall}}{\text{precision} + \text{recall}}
+\label{eq:f1}
+\end{equation}
+95\% confidence intervals were produced for whole measures in order to evaluate the dependability of the estimated performance metrics. An estimated range that is anticipated to include the real value of a metric with 95\% certainty is provided by a 95\% confidence interval. While narrow intervals show more consistent and dependable model performance, wide intervals show greater variability and less assurance in the measure. The bootstrap resampling method, which repeatedly samples the testing predictions with replacement to mimic the sampling distribution of each measure, was used in this work to establish confidence intervals.
+To ascertain if the performance difference between two classification models is statistically significant, the McNemar test was used in addition to confidence interval calculation. The McNemar test is especially intended to compare two models assessed on the same testing set. It concentrates on discordant pairings, or instances when one model incorrectly classifies but the other properly classifies. The test yields a p‑value, which indicates that the performance difference is unlikely to have happened by coincidence if it is less than the widely accepted cutoff of 0.05.
+The training process was carried out using the PyTorch framework. The Adam optimizer and an initial learning rate of 0.0001 were used to train each model for a total of 200 epochs. The batch size was set to 4 in order to guarantee that the model fit within the available memory because the machine utilized in this investigation had an RTX 3050 Ti GPU with 4 GB of video random access memory (VRAM). The input images were resized to 224 $\times$ 224 pixels before being fed into the models. The images were also normalized using the ImageNet dataset’s mean and standard deviation values.
+
+To improve the model’s capacity for generalization and raise the effective sample diversity, data augmentation approaches were also used. All training samples were treated to the following changes with equal chance using the PyTorch DataLoader: random rotation ($\pm$20$^\circ$), random horizontal flip, random vertical flip, and color jitter (brightness=0.2, contrast=0.2, saturation=0.2). By increasing the training set’s diversity regardless of class distribution, these augmentations lessened the possibility of overfitting.
+Dynamic training control techniques based on validation performance were used to preserve training stability and avoid the model overfitting to the majority class. The learning rate was lowered by a factor of 0.5 when validation accuracy did not increase for five consecutive epochs. Early stopping was initiated if no progress was seen after fifteen epochs. By avoiding needless training, this approach lessens the possibility of overly adapting to the majority class. The checkpoint with the best validation accuracy was chosen as the final model, and model weights were recorded at the end of each epoch.
+Experimental findings
+\begin{table}[htbp]
+\centering
+\caption{Training results}
+\label{tab:training}
+\begin{tabular}{l}
+\hline
+Training resultsModelFoldFold1 MaxViT \\
+\hline
+\end{tabular}
+\end{table}
+Table 3 displays the experimental results of the categorization of normal and chondromalacia patella on the training dataset.
+The 5‑fold cross validation’s average training results show that every model performed very well across evaluation metrics. GoogLeNet has an exceptionally high fitting capacity among the architectures assessed, with perfect average scores of 1.0000 across all measures. Additionally, MobileNetV2, MaxViT, Swin Transformer, and ResNet18 demonstrate steady convergence and efficient feature learning with consistently high accuracy and low variability.
+\begin{table}[htbp]
+\centering
+\caption{Validation results}
+\label{tab:validation}
+\begin{tabular}{l}
+\hline
+Validation ResultsModelFoldFold1 MaxViT \\
+Fold2 MaxViT \\
+Fold2 MaxViT \\
+Fold3 MaxViT \\
+Fold3 MaxViT \\
+Fold4 MaxViT \\
+Fold4 MaxViT \\
+Accuracy Precision Recall F1-Score0.9972ResNet180.9934Swin Transformer 0.99430.9953ViT1.0000GoogLeNet0.9981MobileNetV20.9981ResNet180.9981Swin Transformer 1.00000.9679ViT1.0000GoogLeNet1.0000MobileNetV20.9981ResNet180.9991Swin Transformer 0.98870.9915ViT1.0000GoogLeNet0.9991MobileNetV20.9981ResNet180.9943Swin Transformer 1.00000.9604ViT1.0000GoogLeNet0.9991MobileNetV21.00000.9915ResNet18Swin Transformer 1.00000.9972ViT1.0000GoogLeNet0.9981MobileNetV20.9983ResNet180.9953Swin Transformer 0.99660.9825ViT1.0000GoogLeNet0.9989MobileNetV2 \\
+\hline
+0.9972 0.99720.9934 0.99340.9943 0.99430.9953 0.99531.0000 1.00000.9981 0.99810.9981 0.99810.9981 0.99811.0000 1.00000.9679 0.96821.0000 1.00001.0000 1.00000.9981 0.99810.9991 0.99910.9887 0.98870.9915 0.99151.0000 1.00000.9991 0.99910.9981 0.99810.9943 0.99431.0000 1.00000.9604 0.96041.0000 1.00000.9991 0.99911.0000 1.00000.9915 0.99151.0000 1.00000.9972 0.99721.0000 1.00000.9981 0.99810.9983 0.99830.9953 0.99530.9966 0.99660.9825 0.98251.0000 1.00000.9989 0.9989 \\
+0.99720.99350.99430.99531.00000.99810.99810.99811.00000.96891.00001.00000.99810.99910.98890.99161.00000.99910.99810.99441.00000.96041.00000.99911.00000.99171.00000.99721.00000.99810.99830.99540.99660.98271.00000.9989 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Validation Results}
+All models show good generalization performance, but with more variability than during the training phase, according to the validation findings compiled in Table~\ref{tab:validation}. With an accuracy of 0.9814, ResNet18 outperforms the other analyzed architectures on average. GoogLeNet comes in second with an accuracy of 0.9746, MaxViT with an accuracy of 0.9729, and MobileNetV2 with an accuracy of 0.9712. These models demonstrate robust classification performance throughout validation folds by consistently producing excellent accuracy, recall, and F1‑score values. With an average accuracy of 0.9627, the Swin Transformer performs moderately, while the ViT has the lowest average accuracy of 0.9508.
+\begin{table}[htbp]
+\centering
+\caption{Validation results (Table 4)}
+\label{tab:validation}
+\begin{tabular}{l c}
+\hline
+Model & Accuracy \\
+\hline
+ResNet18 & 0.9814 \\
+GoogLeNet & 0.9746 \\
+MaxViT & 0.9729 \\
+MobileNetV2 & 0.9712 \\
+Swin Transformer & 0.9627 \\
+ViT & 0.9508 \\
+\hline
+\end{tabular}
+\end{table}
+\section{Testing Results}
+The experimental findings of evaluating the testing data‑set for chondromalacia patella and normal are given in Table~\ref{tab:testing}. When compared to the other analyzed designs, Max‑ViT’s better generalization capacity is evident from the testing results shown in Table~\ref{tab:testing}. MaxViT consistently obtains the greatest accuracy values across folds, often above 0.98, with narrow 95\% confidence intervals, indicating good statistical dependability and high discriminative power. This steady performance shows that MaxViT captures hierarchical and long‑range relationships in knee MRI images better than traditional CNNs and other transformer‑based models. MaxViT continues to be the most reliable and consistently top‑performing model, even though other convolution‑based architectures also demonstrate strong performance.
+\begin{table}[htbp]
+\centering
+\caption{Testing results with 95\% confidence intervals (Table 5)}
+\label{tab:testing}
+\begin{tabular}{l}
+\hline
+Model \\
+\hline
+MaxViT \\
+ResNet18 \\
+Swin Transformer \\
+ViT \\
+GoogLeNet \\
+MobileNetV2 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Results}
+The confidence intervals shown in Table~\ref{tab:performance} offer crucial information about the robustness and statistical dependability of the assessed models. Low variability between testing folds is shown by narrow 95\% confidence intervals, which imply that a model’s performance is steady and not excessively sensitive to the particular data split. MaxViT regularly shows among the tightest confidence intervals in our analysis, indicating great stability and trustworthy generalization on unknown data. These narrow ranges suggest that MaxViT’s high accuracy scores are constant across various dataset subsets rather than being an outcome of chance. The robustness of models like ResNet18, GoogLeNet, and Swin Transformer is further reinforced by their very narrow intervals. The ViT architecture, on the other hand, shows considerably larger confidence intervals, suggesting that its predictions are more uncertain and that performance fluctuated more between folds. This fluctuation implies that ViT could have difficulty identifying the pertinent structural patterns in the MRI data.
+\begin{table}[htbp]
+\centering
+\caption{Performance metrics with 95\% confidence intervals}
+\label{tab:performance}
+\begin{tabular}{p{0.95\linewidth}}
+\hline
+Accuracy/95\% CI 0.9797/(0.9627, 0.9932)0.9763/(0.9559, 0.9932)0.9763/(0.9593, 0.9932)0.9695/(0.9492, 0.9864)0.9831/(0.9661, 0.9966)0.9695/(0.9492, 0.9864)0.9831/(0.9661, 0.9966)0.9831/(0.9661, 0.9966)0.9763/(0.9593, 0.9932)0.9288/(0.8983, 0.9559)0.9831/(0.9661, 0.9966)0.9729/(0.9525, 0.9898)0.9831/(0.9661, 0.9966)0.9797/(0.9627, 0.9932)0.9492/(0.9254, 0.9729)0.9593/(0.9356, 0.9797)0.9797/(0.9627, 0.9932)0.9763/(0.9559, 0.9932)0.9898/(0.9762, 1.0000)0.9830/(0.9660, 0.9966)0.9864/(0.9728, 0.9966)0.9014/(0.8639, 0.9354)0.9694/(0.9490, 0.9864)0.9864/(0.9728, 0.9966)0.9728/(0.9524, 0.9898)0.9592/(0.9354, 0.9796)0.9558/(0.9320, 0.9762)0.9354/(0.9082, 0.9626)0.9660/(0.9422, 0.9864)0.9524/(0.9286, 0.9762)0.9817/(0.9647, 0.9952)0.9763/(0.9572, 0.9918)0.9688/(0.9498, 0.9864)0.9389/(0.9110, 0.9640)0.9763/(0.9572, 0.9918)0.9715/(0.9518, 0.9884) \\
+\hline
+Precision/95\% CI 0.9804/(0.9650, 0.9934)0.9768/(0.9596, 0.9932)0.9763/(0.9591, 0.9902)0.9694/(0.9490, 0.9867)0.9831/(0.9671, 0.9966)0.9700/(0.9502, 0.9870)0.9831/(0.9664, 0.9966)0.9840/(0.9721, 0.9966)0.9768/(0.9609, 0.9904)0.9316/(0.9058, 0.9579)0.9835/(0.9685, 0.9966)0.9732/(0.9528, 0.9899)0.9835/(0.9678, 0.9966)0.9796/(0.9626, 0.9933)0.9490/(0.9218, 0.9728)0.9592/(0.9354, 0.9798)0.9804/(0.9647, 0.9934)0.9768/(0.9596, 0.9902)0.9898/(0.9765, 1.0000)0.9834/(0.9676, 0.9966)0.9866/(0.9728, 0.9966)0.9036/(0.8703, 0.9358)0.9723/(0.9563, 0.9870)0.9870/(0.9750, 0.9966)0.9736/(0.9556, 0.9899)0.9592/(0.9349, 0.9799)0.9560/(0.9320, 0.9767)0.9349/(0.9072, 0.9625)0.9660/(0.9451, 0.9864)0.9528/(0.9289, 0.9761)0.9821/(0.9663, 0.9953)0.9766/(0.9594, 0.9919)0.9689/(0.9493, 0.9853)0.9397/(0.9135, 0.9645)0.9771/(0.9603, 0.9920)0.9720/(0.9533, 0.9880) \\
+\hline
+Recall/95\% CI 0.9797/(0.9627, 0.9932)0.9763/(0.9559, 0.9932)0.9763/(0.9559, 0.9932)0.9695/(0.9492, 0.9864)0.9831/(0.9661, 0.9966)0.9695/(0.9492, 0.9864)0.9831/(0.9661, 0.9966)0.9831/(0.9661, 0.9966)0.9763/(0.9593, 0.9932)0.9288/(0.8983, 0.9559)0.9831/(0.9661, 0.9966)0.9729/(0.9525, 0.9898)0.9831/(0.9661, 0.9966)0.9797/(0.9627, 0.9932)0.9492/(0.9220, 0.9729)0.9593/(0.9356, 0.9797)0.9797/(0.9627, 0.9932)0.9763/(0.9593, 0.9932)0.9898/(0.9762, 1.0000)0.9830/(0.9660, 0.9966)0.9864/(0.9728, 0.9966)0.9014/(0.8639, 0.9354)0.9694/(0.9490,
+
+\begin{table}[htbp]
+\centering
+\caption{McNemar test p-values for model comparisons against Max-ViT}
+\label{tab:mcnearm}
+\begin{tabular}{l}
+\hline
+Table 6 McNemar test p-values for model comparisons against Max-ViT\\
+Fold GoogLeNet MobileNetV2 ResNet18 Swin Transformer\\
+1.000000 1.000000 0.581055 1.000000 0.726562\\
+0.000855 1.000000 0.001953 0.039062 0.687500\\
+1.000000 0.000001 0.218750 0.125000 0.003418\\
+\\
+Fold1 1.000000\\
+Fold2 1.000000\\
+Fold3 1.000000\\
+Fold4 0.109375\\
+Fold5 0.625000\\
+\\
+0.453125 0.507812 0.625000 1.000000 0.031250\\
+ViT\\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[htbp]
+\centering
+\caption{A comparison of the research gathered from the literature with the proposed model}
+\label{tab:comparison}
+\begin{tabular}{l}
+\hline
+Table 7 A comparison of the research gathered from the literature with the proposed model\\
+Paper[5][19][30]\\
+\\
+Accuracy Objective\\
+0.9431 Knee disorders VAG\\
+VAG Osteoarthritis 0.893 X-ray, CT, MRI\\
+0.84 Knee abnormalities Osteoarthritis CMP\\
+\\
+Method LSSVM MLPCNN\\
+0.936 0.70\\
+VAG MRI\\
+Modality\\
+[40][39]\\
+CNN Lasso Regression\\
+Proposed MaxViT\\
+CMP\\
+MRI\\
+0.9817\\
+\hline
+\end{tabular}
+\end{table}
+There is no statistically significant difference between their misclassification patterns and MaxViT. In which means that these models do not exhibit statistically distinct error distributions in many folds, indicating that they frequently make mistakes on similar samples, even if MaxViT achieves better accuracy on average. However, the ViT consistently displays low p-values over several folds, all of which are below the 0.05 significance level. This suggests that the ViT's mis-classification behavior is very different from MaxViT's.
+Table 7 provides a performance comparison between the.
+
+\section{Performance Comparison}
+Table~\ref{tab:performance} provides a performance comparison between the proposed model and the literature research.
+\begin{table}[htbp]
+\centering
+\caption{Performance comparison between the proposed model and literature}
+\label{tab:performance}
+\begin{tabular}{lll}
+\hline
+Method & Accuracy & Reference \\
+\hline
+LSSVM & 0.9431 & \cite{ref5} \\
+MLP & 0.893 & \cite{ref19} \\
+CNN (multi‑modal) & 0.84 & \cite{ref30} \\
+CNN (vibroarthrography) & 0.936 & \cite{ref40} \\
+Lasso regression & 0.7 & \cite{ref39} \\
+MaxViT (proposed) & 0.9817 & This work \\
+\hline
+\end{tabular}
+\end{table}
+\section{Computation Time}
+In this study, testing was conducted using the identical hardware specifications as were utilized for training. Table~\ref{tab:parameters} lists the number of parameters for each model, and Table~\ref{tab:comptime} presents the computational complexity and predictive performance on the testing dataset.
+\begin{table}[htbp]
+\centering
+\caption{Number of model parameters}
+\label{tab:parameters}
+\begin{tabular}{ll}
+\hline
+Model & Parameters \\
+\hline
+GoogLeNet & 560 \\
+MaxViT & 195 \\
+MobileNetV2 & 430 \\
+ResNet18 & 408 \\
+Swin Transformer & 650 \\
+ViT & 222 \\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[htbp]
+\centering
+\caption{Computation time comparison on testing dataset (seconds)}
+\label{tab:comptime}
+\begin{tabular}{lcccc}
+\hline
+Model & Fold1 & Fold2 & Fold3 & Average \\
+\hline
+MobileNetV2 & ... & ... & ... & ... \\
+GoogLeNet & ... & ... & ... & ... \\
+ResNet18 & ... & ... & ... & ... \\
+Swin Transformer & ... & ... & ... & ... \\
+ViT & ... & ... & ... & ... \\
+MaxViT & ... & ... & ... & ... \\
+\hline
+\end{tabular}
+\end{table}
+MobileNetV2 consistently shows the lowest computation time when the average values across all folds are analyzed, followed by GoogLeNet and ResNet18. Swin Transformer outperforms ViT among transformer‑based models, however both models take longer to compute than traditional CNN designs. MaxViT exhibits much slower performance, especially at smaller batch sizes, and has the greatest testing‑time cost of all designs. All models experience the anticipated drop in calculation times as the batch size grows, however the pace of reduction varies according to the model design. A thorough computational‑time study was carried out for both a batch size of one and many batch sizes in order to assess the model’s clinical relevance. An NVIDIA RTX 3050 Ti with 4 GB of VRAM was utilized in this investigation; it was specifically selected as a low‑cost substitute that is more likely to be found in clinical workstations than expensive, research‑grade hardware. As a result, the memory and computing‑time requirements were designed to represent a situation that is more similar to actual clinical settings. Batch sizes of 1, 2, 4, 8, 16, and 32 were used to measure and compare inference times for all models throughout the testing phase. This research made it possible to assess the models’ actual deployment elements, such as hardware compatibility and runtime efficiency, in addition to their theoretical performance. The findings show that all models may be implemented on inexpensive, common workstations that are probably used in clinical settings.
+\section{Discussion}
+The study’s experimental results show that deep‑learning architectures, in particular MaxViT, can perform better when it comes to automatically diagnosing chondromalacia patella from MRI images. The findings show that MaxViT outperforms CNN‑based and transformer‑based models, making it the best‑performing model across all assessed architectures. With an average testing accuracy of 0.9817, precision of 0.9821, recall of 0.9817, and F1‑score of 0.9818, MaxViT demonstrated exceptional classification performance. These findings are a significant improvement above previous methods in the literature. MaxViT shows better classification performance than the lasso‑regression technique described by \cite{ref39}, which only obtained 0.7 accuracy for CMP diagnosis using MRI. This enhancement highlights the benefit of using MaxViT structures to capture intricate patterns in CMP images.
+Additionally, MaxViT regularly showed 95\% confidence intervals that were narrow. MaxViT’s statistical dependability suggests that it represents true generalization capabilities.
+
+\begin{table}[htbp]
+\centering
+\caption{Computation time comparison on testing dataset (seconds)}
+\label{tab:comptime}
+\begin{tabular}{l}
+\hline
+Physical and Engineering Sciences in Medicine1 3 \\
+\hline
+Table 9 Computation time comparison on testing dataset (seconds)FoldFold1 \\
+\hline
+Batch Size124816321248163212481632124816321248163212481632 \\
+\hline
+MaxViT12.166.584.384.184.094.4713.236.644.344.033.953.8212.486.854.464.274.024.0112.486.494.284.034.043.9212.446.824.394.043.943.8312.566.684.374.114.014.03 \\
+\hline
+ResNet183.142.141.801.661.581.883.082.161.841.751.691.865.963.161.911.681.651.483.031.991.641.501.451.583.021.991.661.501.441.413.652.291.771.621.561.64 \\
+\hline
+Swin Transformer6.773.753.173.012.932.877.276.594.523.993.882.836.843.733.042.902.913.146.754.053.132.992.932.796.693.703.032.862.792.766.864.363.383.153.092.88 \\
+\hline
+ViT7.716.315.706.285.005.107.165.504.924.745.975.927.956.875.244.844.825.067.776.465.205.515.596.229.646.666.146.135.595.308.056.365.445.505.395.52 \\
+\hline
+GoogLeNet9.153.172.041.661.531.445.093.022.021.591.631.466.233.261.881.531.371.329.983.122.031.671.551.467.693.022.171.921.541.447.633.122.031.671.521.42 \\
+\hline
+MobileNetV23.742.421.721.511.411.363.752.341.701.501.411.533.952.531.891.651.571.483.742.471.811.662.582.674.033.482.461.741.591.483.842.651.921.611.711.70 \\
+\hline
+Fold2 \\
+\hline
+Fold3 \\
+\hline
+Fold4 \\
+\hline
+Fold5 \\
+\hline
+Average \\
+\hline
+\end{tabular}
+\end{table}
+No matter whether subset of data is utilized for testing, Max-ViT retains strong performance, according to the confidence interval analysis. While the ViT consistently showed signifi-cantly different misclassification behavior over several folds with p < 0.05, the majority of CNN-based models did not reveal statistically significant variations in mistake patterns compared to MaxViT with p > 0.05. This implies that while pure transformer models struggle with various elements of the classification problem, MaxViT and CNN-based designs typically agree on challenging scenarios.
+Examining Fig. 8, it is evident that all models concentrate on anatomically CMP related areas. This implies that rather than depending on dataset specific artifacts, the models capture significant disease related trends.
+According to the parameter study, MaxViT achieves the best possible balance between computational efficiency and model capacity. MaxViT is significantly smaller than the ViT with about 30.4 million parameters, yet it performs noticeably better.
+The suggested model is meant to serve as a decision-support tool rather than a stand-alone diagnostic system from a clinical standpoint. By functioning on regularly obtained knee MRI scans, it can be easily included into current radiological workflows without the need for extra imaging protocols or manual preprocessing. To automatically evaluate MRI studies after acquisition, the model might often be integrated into the picture archiving and communication system (PACS).
+
+The suggested model is meant to serve as a decision‑support tool rather than a stand‑alone diagnostic system from a clinical standpoint. By functioning on regularly obtained knee MRI scans, it can be easily included into current radiological workflows without the need for extra imaging protocols or manual preprocessing. To automatically evaluate MRI studies after acquisition, the model might often be integrated into the picture archiving and communication system (PACS).
+The suggested transformer‑based MaxViT architecture demonstrates methodological features that are extremely relevant across a wide range of data‑limited and interpretation‑sensitive domains, in addition to its particular application to the diagnosis of chondromalacia patella.
+Transformer models have shown superior performance in myocardial ischemia detection from electrocardiography signals, as thoroughly reviewed by \cite{ref2}. This highlights the usefulness of attention mechanisms for modeling long‑range dependencies in time‑series physiological data. This evidence implies that the attention strategies used in Max‑ViT are suitable for sequential signal processing as well as static imaging.
+The MicroCrystalNet architecture, which was suggested for micro‑porosity mapping in geological formations, shows how well‑thought‑out convolutional and attention‑inspired mechanisms can achieve strong performance and high interpretability in the geoscience domain even with limited data availability \cite{ref45}. Similar to this, \cite{ref44} demonstrated how cross‑modal feature learning techniques may successfully handle sparse data conditions in the classification of paleontological fossils, highlighting the significance of multi‑scale and attention‑based representations in situations when labeled examples are hard to come by.
+Dual‑stage feature fusion techniques have been applied in sustainable energy monitoring to combine red‑green‑blue (RGB) and temperature data for photovoltaic defect identification under practical limitations \cite{ref9}. Similar functions are provided by MaxViT’s hierarchical block and grid attention structure, which allows for selective emphasis on diagnostically significant regions while suppressing unnecessary information. The significance of parameter‑efficient designs for complex physical systems has also been highlighted in computational fluid dynamics, where lightweight architectures like FluidNet‑Lite have shown that effective neural representations can successfully model multiphase flow in porous media without unnecessary computational overhead \cite{ref43}.
+When combined, these cross‑domain investigations show that rather than being a task‑specific solution, the suggested MaxViT‑based framework represents a generalizable methodological paradigm. Its interpretability, scalability, and capacity to manage small amounts of training data through effective attention mechanisms point to possible applications to a variety of application domains. These include more general applications in infrastructure analysis and environmental monitoring, as well as structural engineering tasks like wireless coverage prediction from architectural layouts \cite{ref6}.
+\section{Conclusion}
+The MaxViT is a very successful design for the automated identification of chondromalacia patella from MRI images, as this study shows. MaxViT continuously obtained state‑of‑the‑art classification performance by thorough examination throughout 5‑fold cross validation. These outcomes far outperform both transformer models and conventional CNN‑based designs.
+With narrow confidence intervals and positive McNemar test results, MaxViT demonstrated exceptional stability and statistical reliability in addition to great predictive accuracy. MaxViT’s inference performance is still well within acceptable bounds for real‑time clinical decision assistance, although requiring a little more processing time than light‑weight CNNs.
+The use of a comparatively limited dataset gathered from a single institution is one of the study’s primary drawbacks. The model’s high accuracy may have been influenced by scanner settings, quality of image, and imaging practices unique to the institution. As a result, rather than learning actual disease‑related characteristics, the model might have acquired dataset or institution‑specific patterns. Because external data from other institutions may cause the good performance reported in this study to decline, it should be viewed cautiously.
+Furthermore, the near‑perfect accuracy findings might look statistically overoptimistic due to the testing set’s small size and lack of variety. Therefore, inter‑institutional validation studies encompassing various MRI scanners, patient groups, and acquisition techniques are essential to accurately evaluate the model’s generalizability under actual clinical situations.
+Building bigger, multi‑center datasets, creating models for four‑grade CMP classification, and methodically testing the model on separate external datasets will be the main goals of future research. It is anticipated that these actions will improve generalizability and offer a more trustworthy evaluation of the model’s actual clinical deployment potential.
+\section{Author Contributions}
+Material preparation, data collection, data curation and analysis were performed by Ömer Kazcı and Habip Eser Akkaya. Conceptualization, methodology, software, literature review, investigation, validation, visualization and writing were carried out by Semih Demirel, Okan Demirtaş and Sümeyra Kuş Ordu. Methodology, supervision, project administration, investigation and conceptualization were performed by Oktay Yıldız. All authors read and approved the final manuscript.
+\section{Funding}
+Open access funding provided by the Scientific and Technological Research Council of Türkiye (TÜBİTAK). The authors declare that no funds, grants, or other support were received during the preparation of this manuscript.
+\section{Data Availability}
+The data used in this study are not publicly available due to privacy restrictions and institutional policies.
+\section{Declarations}
+
+\section{Declarations}
+\subsection{Conflict of interest}
+The authors have no relevant financial or non‑financial interests to disclose.
+\subsection{Ethical approval}
+The study does not involve research on human participants or animals.
+\subsection{Open Access}
+This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons licence, and indicate if changes were made. The images or other third party material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If material is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder.
+
+% ===== REFERENCES =====
+
+\begin{thebibliography}{99}
+
+\bibitem{ref1} Alkhatib MQ (2025) Polsar image classification using complex-valued multiscale attention vision transformer (cv-msatvit). Int J Appl Earth Obs Geoinf 137:104412
+
+\bibitem{ref2} Ansari MY, Yaqoob M, Ishaq M et al (2025) A survey of trans-formers and large language models for ecg diagnosis: advances, challenges, and future directions. Artif Intell Rev 58(9):261. h t t p s : / / d o i . o r g / 1 0 . 1 0 0 7 / s 1 0 4 6 2 - 0 2 5 - 1 1 2 5 9 - x
+
+\bibitem{ref3} Aytar B, Gündüç S (2024) Generation of synthetic data using breast cancer dataset and classification with resnet18. Karaelmas Fen ve Mühendislik Dergisi 14(3):74–85. h t t p s : / / d o i . o r g / 1 0 . 7 2 1 2 / k a r a e l m a s f e n . 1 4 8 9 1 6 8
+
+\bibitem{ref4} Anuradha A, Alsolai H, Allafi R et al (2025) Automated detec-tion of landslide using synergizing dual graph convolutional net-works, googlenet, and machine learning techniques. J S Am Earth Sci 157:105457
+
+\bibitem{ref5} Balajee A, Venkatesan R (2023) A survey on classification meth-odologies utilized for classifying the knee joint disorder levels using vibroarthrographic signals. Materials Today: Proceedings 80:3240–3243. SI:5 NANO 2021
+
+\bibitem{ref6} Chen L, Zhang D, Zhang J, et al (2021) An incentive approach in mobile crowdsensing for perceptual user. In: 2021 IEEE 46th Conference on Local Computer Networks (LCN), pp 359–362, h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / L C N 5 2 1 3 9 . 2 0 2 1 . 9 5 2 4 9 5 1
+
+\bibitem{ref7} Chen SH, Wu YL, Pan CY et al (2023) Breast ultrasound image classification and physiological assessment based on googlenet. Journal of Radiation Research and Applied Sciences 16(3):100628. h t t p s : / / d o i . o r g / 1 0 . 1 0 1 6 / j . j r r a s . 2 0 2 3 . 1 0 0 6 2 8 .8. Cucchiarini M, De Girolamo L, Filardo G et al (2016) Basic science of osteoarthritis. Journal of experimental orthopaedics 3:1–18
+
+\bibitem{ref8} Dahmani H, Yaqoob M, Ansari MY, et al (2025) Thermal homog-raphy in photovoltaic panels: Evaluating deep learning and feature-based methods. In: 2025 IEEE Texas Power and Energy Conference (TPEC), pp 1–6. h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / T P E C 6 3 9 8 1 . 2 0 2 5 . 1 0 9 0 7 1 6 1
+
+\bibitem{ref9} Deng J, Dong W, Socher R, et al (2009) Imagenet: A large-scale hierarchical image database. In: 2009 IEEE Conference on Com-puter Vision and Pattern Recognition, pp 248–255
+
+\bibitem{ref10} 9. Dahmani H, Yaqoob M, Ansari MY, et al (2025) Thermal homog-raphy in photovoltaic panels: Evaluating deep learning and feature-based methods. In: 2025 IEEE Texas Power and Energy Conference (TPEC), pp 1–6. h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / T P E C 6 3 9 8 1 . 2 0 2 5 . 1 0 9 0 7 1 6 1
+
+\bibitem{ref11} 10. Deng J, Dong W, Socher R, et al (2009) Imagenet: A large-scale hierarchical image database. In: 2009 IEEE Conference on Com-puter Vision and Pattern Recognition, pp 248–255
+
+\bibitem{ref12} 11. Dosovitskiy A, Beyer L, Kolesnikov A, et al (2020) An image is worth 16x16 words: Transformers for image recognition at scale. arXiv preprint arXiv:2010.11929
+
+\bibitem{ref13} 12. Elharrouss O, Himeur Y, Mahmood Y et al (2025) Vits as back-bones: Leveraging vision transformers for feature extraction. Information Fusion 118:102951
+
+\bibitem{ref14} 13. Fırat H, üzen H (2024) Detection of pneumonia using a hybrid approach consisting of mobilenetv2 and squeeze-and-excitation network. Türk Doğa ve Fen Dergisi 13(1):54–61. h t t p s : / / d o i . o r g / 1 0 . 4 6 8 1 0 / t d f d . 1 3 6 3 2 1 8
+
+\bibitem{ref15} 14. Gerbasi A, Dagliati A, Albi G et al (2024) Cad-rads scoring of coronary ct angiography with multi-axis vision transformer: a clinically-inspired deep learning pipeline. Comput Methods Pro-grams Biomed 244:107989
+
+\bibitem{ref16} 15. Gold GE, Han E, Stainsby J et al (2004) Musculoskeletal mri at 3.0 t: relaxation times and image contrast. Am J Roentgenol 183(2):343–351
+
+\bibitem{ref17} 16. Gómez Muñoz CQ, Márquez FPG, Sanjuán JB (2025) Hybrid cnn architecture for hot spot detection in photovoltaic panels using fast r-cnn and googlenet. CMES - Computer Modeling in Engineering and Sciences 144(3):3369–3386. h t t p s : / / d o i . o r g / 1 0 . 3 2 6 0 4 / c m e s . 2 0 2 5 . 0 6 9 2 2 5
+
+\bibitem{ref18} 17. He K, Zhang X, Ren S, et al (2016) Deep residual learning for image recognition. In: 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp 770–778, h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / C V P R . 2 0 1 6 . 9 0
+
+\bibitem{ref19} 18. Karabay GS, Çavaş M, Avcı E (2025) Çiçek sınıflandırmada alexnet ve mobilenetv2 mimarilerinin performans karşılaştırması. Gazi Üniversitesi Mühendislik Mimarlık Fakültesi Dergisi 40(2):829–836. h t t p s : / / d o i . o r g / 1 0 . 1 7 3 4 1 / g a z i m m f d . 1 4 6 3 6 6 319.
+
+\bibitem{ref20} Karpiński R, Krakowski P, Jonak J, et al (2023) Comparison of selected classification methods based on machine learning as a diagnostic tool for knee joint cartilage damage based on gener-ated vibroacoustic processes. Applied Computer Science 19(4)20.
+
+\bibitem{ref21} Kingma DP (2014) Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980
+
+\bibitem{ref22} He K, Zhang X, Ren S, et al (2016) Deep residual learning for image recognition. In: 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp 770–778, https://doi.org/10.1109/CVPR.2016.90
+
+\bibitem{ref23} Karabay GS, Çavaş M, Avcı E (2025) Çiçek sınıflandırmada alexnet ve mobilenetv2 mimarilerinin performans karşılaştırması. Gazi Üniversitesi Mühendislik Mimarlık Fakültesi Dergisi 40(2):829–836. https://doi.org/10.1734 1/gazimmfd.146366319
+
+\bibitem{ref24} Lin TY, Goyal P, Girshick R, et al (2017) Focal loss for dense object detection. In: 2017 IEEE International Conference on Computer Vision (ICCV), pp 2999–3007, https://doi.org/10.1109/ICCV.2017.324
+
+\bibitem{ref25} Litjens G, Kooi T, Bejnordi BE et al (2017) A survey on deep learning in medical image analysis. Med Image Anal 42:60–8823.
+
+\bibitem{ref26} Liu X, Liu Y, Wang Y et al (2025) A hybrid swin transformer model for image reconstruction of electrostatic tomography. Flow Meas Instrum 106:103033. https://doi.org/10.1016/j.flowmeasinst.2025.103033
+
+\bibitem{ref27} Liu Z, Lin Y, Cao Y, et al (2021) Swin transformer: Hierarchical vision transformer using shifted windows. In: 2021 IEEE/CVF International Conference on Computer Vision (ICCV), pp 9992–10002, https://doi.org/10.1109/ICCV48922.2021.00986
+
+\bibitem{ref28} Ma X, Chen S (2025) Stpeic: a swin transformer-based frame-work for interpretable post-earthquake structural classification. SDHM Structural Durability and Health Monitoring 19(6):1745–1767. https://doi.org/10.32604/sdhm.2025.071148
+
+\bibitem{ref29} McConnell J (2002) The physical therapist’s approach to patel- lofemoral disorders. Clin Sports Med 21(3):363–387
+
+\bibitem{ref30} Meedeng K, Charoensuk W, Panich K, et al (2016) Spectral anal-ysis of knee vibroarthrographic signals in asymptomatic chondro-malacia patella. In: 2016 IEEE EMBS Conference on Biomedical Engineering and Sciences (IECBES), IEEE, pp 110–114
+
+\bibitem{ref31} Ong KL, Lee CP, Lim HS et al (2023) Scqt-maxvit: speech emo-tion recognition with constant-q transform and multi-axis vision transformer. IEEE Access 11:63081–63091 Physical and Engineering Sciences in Medicine1 3
+
+\bibitem{ref32} Özaltın Ö, Yeniay Ö (2023) Detection of monkeypox disease from skin lesion images using mobilenetv2 architecture. Communications Faculty of Sciences University of Ankara Series A1 Mathematics and Statistics 72(2):482–499. https://doi.org/10.31801/cfsuasm.1202806
+
+\bibitem{ref33} 28. Ong KL, Lee CP, Lim HS et al (2023) Scqt-maxvit: speech emo-tion recognition with constant-q transform and multi-axis vision transformer. IEEE Access 11:63081–63091 Physical and Engineering Sciences in Medicine1 3
+
+\bibitem{ref34} 29. Özaltın Ö, Yeniay Ö (2023) Detection of monkeypox disease from skin lesion images using mobilenetv2 architecture. Com-munications Faculty of Sciences University of Ankara Series A1 Mathematics and Statistics 72(2):482–499. h t t p s : / / d o i . o r g / 1 0 . 3 1 8 0 1 / c f s u a s m a s . 1 2 0 2 8 0 6
+
+\bibitem{ref35} 30. Parekh MA, Meva D (2024) A comprehensive review of knee abnormalities detection current procedures, outcomes and pros-pects. In: 2024 First International Conference on Technological Innovations and Advance Computing (TIACOMP), IEEE, pp 154–160
+
+\bibitem{ref36} 31. Powers CM (2003) The influence of altered lower-extremity kinematics on patellofemoral joint dysfunction: a theoretical perspective. Journal of Orthopaedic & Sports Physical Therapy 33(11):639–646
+
+\bibitem{ref37} 32. Recht M, Bobic V, Burstein D et al (2001) Magnetic resonance imaging of articular cartilage. Clinical Orthopaedics and Related Research® 391:S379–S396
+
+\bibitem{ref38} 33. Roca-Ginés A, Romero-Martín JA, Castellote-Huguet P, et al (2024) Multiparametric analysis in knee mri for an early detec-tion of osteoarthritis biomarkers. In: 2024 46th Annual Inter-national Conference of the IEEE Engineering in Medicine and Biology Society (EMBC), IEEE, pp 1–4
+
+\bibitem{ref39} 34. Roy SK, Jamali A, Chanussot J et al (2025) Simpoolformer: a two-stream vision transformer for hyperspectral image classifi-cation. Remote Sensing Applications Society and Environment 37:101478
+
+\bibitem{ref40} 35. Sandler M, Howard A, Zhu M, et al (2018) Mobilenetv2: Inverted residuals and linear bottlenecks. In: 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp 4510–4520. h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / C V P R . 2 0 1 8 . 0 0 4 7 4
+
+\bibitem{ref41} 36. Schiphof D (2011) Identifying knee osteoarthritis. Optima Graf-ische Communicatie, Dutch Arthritis Foundation Amsterdam Rotterdam
+
+\bibitem{ref42} 37. Shen D, Wu G, Suk HI (2017) Deep learning in medical image analysis. Annu Rev Biomed Eng 19(1):221–248
+
+\bibitem{ref43} \begin{thebibliography}{99}
+
+\bibitem{ref44} 38. Shin J, Hamza M, Kim H et al (2025) Lightweight swin trans-former for high-precision industrial defect detection in smart manufacturing. Alex Eng J 130:227–240. h t t p s : / / d o i . o r g / 1 0 . 1 0 1 6 / j . a e j . 2 0 2 5 . 0 8 . 0 5 5 .
+
+\bibitem{ref45} 39. Shu Y (2025) Radiomics-based diagnosis of patellar chondroma- lacia using sagittal t2-weighted images. Die Radiologie pp 1–540. Song J, Zhang R (2023) A novel computer-assisted diagnosis method of knee osteoarthritis based on multivariate informa-tion and deep learning modelimage 1. Digital Signal Processing 133:103863
+
+\bibitem{ref46} 41. Szegedy C, Liu W, Jia Y, et al (2015) Going deeper with convolu-tions. In: 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp 1–9. h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / C V P R . 2 0 1 5 . 7 2 9 8 5 9 4
+
+\bibitem{ref47} 42. Tu Z, Talebi H, Zhang H et al (2022) Maxvit: Multi-axis vision transformer. In: Avidan S, Brostow G, Cissé M et al (eds) Com-puter vision - ECCV 2022. Springer Nature Switzerland, Cham, pp 459–479
+
+\bibitem{ref48} 43. Yaqoob M, Ansari MY, Ishaq M et al (2025) Fluidnet-lite: light-weight convolutional neural network for pore-scale modeling of multiphase flow in heterogeneous porous media. Adv Water Resour 200:104952. h t t p s : / / d o i . o r g / 1 0 . 1 0 1 6 / j . a d v w a t r e s . 2 0 2 5 . 1 0 4 9 5 2 .
+
+\bibitem{ref49} 44. Yaqoob
+
+\bibitem{ref50} 45. Yaqoob M, Yusuf Ansari M, Ishaq M et al (2025) Microcrystal-net: an efficient and explainable convolutional neural network for microcrystal classification using scanning electron microscope petrography. IEEE Access 13:53865–53884. h t t p s : / / d o i . o r g / 1 0 . 1 1 0 9 / A C C E S S . 2 0 2 5 . 3 5 5 2 6 2 6
+
+\bibitem{ref51} 46. Zhang T, Xu W, Luo B et al (2025) Depth-wise convolutions in vision transformers for efficient training on small datasets. Neu-rocomputing 617:128998
+
+\bibitem{ref52} 47. Zhu Y, Zhong F, Gao J et al (2025) Research on suprahar-monic detection in renewable energy grid inte-gration based on improved resnet18. Results in Engineering 25:104281. h t t p s : / / d o i . o r g / 1 0 . 1 0 1 6 / j . r i n e n g . 2 0 2 5 . 1 0 4 2 8 1 . Publisher's Note Springer Nature remains neutral with regard to juris-dictional claims in published maps and institutional affiliations. Physical and Engineering Sciences in Medicine1 3
+
+\end{thebibliography}
+\end{document}
